@@ -1,3 +1,6 @@
+# I threw this together in class so it's not that good
+# python version of the sumo Minigame in the main game
+
 import pygame
 from math import *
 
