@@ -16,6 +16,10 @@ connections = 0
 bigCircleRadius = 200
 bounciness = 5.5
 acceleration = 0.25
+font = pygame.font.SysFont(None, 48)
+p1Wins = 0
+p2Wins = 0
+
 
 def dist(x1, y1, x2, y2):
     return sqrt(((x1 - x2) ** 2) + (y1 - y2) ** 2)
@@ -31,8 +35,14 @@ class Player:
         self.canMove = True
     def draw(self):
         pygame.draw.circle(win, self.color, (self.x, self.y), self.radius)
-    def move(self, px, py):
+    def move(self, px, py, playerType):
+        global p1Wins
+        global p2Wins
         if dist(500, 250, self.x, self.y) > bigCircleRadius:
+            if playerType == 1 and self.canMove:
+                p2Wins += 1
+            elif playerType == 2 and self.canMove:
+                p1Wins += 1
             self.canMove = False
         if dist(self.x, self.y, px, py) < 40:
             angle = atan2(py - self.y, px - self.x) + 3.1415926
@@ -89,9 +99,13 @@ while running:
     p1.draw()
     pastX = p1.x
     pastY = p1.y
-    p1.move(p2.x, p2.y)
+    p1.move(p2.x, p2.y, 1)
     p2.draw()
-    p2.move(pastX, pastY)
+    p2.move(pastX, pastY, 2)
+    text1 = font.render("Green Wins: " + str(p1Wins), True, (0, 255, 0))
+    text2 = font.render("Blue Wins: " + str(p2Wins), True, (0, 0, 255))
+    win.blit(text1, (10, 10))
+    win.blit(text2, (750, 10))
 
     if p1.xVel >= incrementVel:
         p1.xVel -= incrementVel
