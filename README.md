@@ -9,7 +9,7 @@ Race is a game played with two players. The two players race against eachother t
 
 ### Test ###
 
-Test is not a game, it justs tests the bouncing mechanic used in Sumo and the circle blockers.
+Test is not a game, it justs tests the bouncing mechanic used in [Sumo](#Sumo) and the circle blockers.
 
 ### Sumo ###
 
