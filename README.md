@@ -43,3 +43,8 @@ This is a function that moves the player outside of a `Blocker` if the player is
 #### Blocker::collisionWithPlayer ####
 
 This is a function that handles most of the collision logic with the player. It sets the players velocities to zero if the player will move inside the `Blocker` on the next frame. The collision is relatively easy for circle `Blockers`, but the Rectangle `Blockers` have the use the [insideOfRect](#insideOfRect) helper function. The Rectangle `Blockers` also only set the velocity that makes the player enter the `Blocker` to zero, not both velocities. This allows the player to slide along the sides of Rectangle `Blockers` without getting stuck.
+
+
+### Boundaries.h ###
+
+Just a header file that declares the `Blocker` class, its constructor,  and its methods.
