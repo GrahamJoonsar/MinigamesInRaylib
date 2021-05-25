@@ -9,7 +9,7 @@ Race is a game played with two players. The two players race against eachother t
 
 ### Test ###
 
-Test is not a game, it justs tests the bouncing mechanic used in [Sumo](#Sumo) and the circle blockers.
+Test is not a game, it justs tests the bouncing mechanic used in [Sumo](#Sumo) and the circle `Blockers`.
 
 ### Sumo ###
 
@@ -26,7 +26,7 @@ Connect 4 is pretty self explanatory, it is a connect four clone. The players ha
 `Boundaries.cpp` defines the `Blocker` class, a rudimentary collider (I probably should change the name of the file). It defines the various methods that a `Blocker` uses to draw to the screen and interact with the player.
 
 #### Dist ####
-Dist is a function that returns the distance between two cartesian coordinates. Tt is used for detecting collision when the `Blocker` is a circle.
+Dist is a function that returns the distance between two cartesian coordinates. It is used for detecting collision when the `Blocker` is a circle.
 
 #### Blocker::draw ####
 
@@ -42,4 +42,4 @@ This is a function that moves the player outside of a `Blocker` if the player is
 
 #### Blocker::collisionWithPlayer ####
 
-This is a function that handles most of the collisin logic with the player. It sets the players velocities to zero if the player will move inside the `Blocker` on the next frame. The collision is relatively easy for circle `Blockers`, but the Rectangle `Blockers` have the use the [insideOfRect](#insideOfRect) helper function. The Rectangle `Blockers` also only set the velocity that makes the player enter the `Blocker` to zero, not both velocities. This allows the player to slide along the sides of Rectangle `Blockers` without getting stuck.
+This is a function that handles most of the collision logic with the player. It sets the players velocities to zero if the player will move inside the `Blocker` on the next frame. The collision is relatively easy for circle `Blockers`, but the Rectangle `Blockers` have the use the [insideOfRect](#insideOfRect) helper function. The Rectangle `Blockers` also only set the velocity that makes the player enter the `Blocker` to zero, not both velocities. This allows the player to slide along the sides of Rectangle `Blockers` without getting stuck.
