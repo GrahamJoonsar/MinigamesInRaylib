@@ -52,6 +52,20 @@ Just a header file that declares the `Blocker` class, its constructor,  and its 
 
 ### button.cpp ###
 
-This is the file that defines the methods that the `Button` class uses. `Buttons` are used to go between `Loaders`, or levels. They also can be used as text boxes, like in the main menu and the credits page.
+This is the file that defines the methods that the `Button` class uses. `Buttons` are used to go between `Loaders`, aka levels. They also can be used as text boxes, like in the main menu and the credits page.
 
+#### Button::draw ####
 
+This is the method that draws the `Button`, which includes the outline, the actual background, and the text of the `Button`.
+
+#### Button::onButtonPress ####
+
+This is a method that handles when the mouse cursor is over the `Button`, and what happens when the player actually presses the `Button`. It first checks if the button is an `actualButton`, which is just a boolean that determines if the `Button` should change color if the mouse is hovering over it. Then, it checks if the mouse is within the bounds of the button, and if it is then the `Button` changes to its `hoverOverColor`. Then it checks if the mouse is being pressed, and if it is the level (`Loader`) will change.
+
+#### Button::changeBoolOnButtonPressed ####
+
+This is the method that causes the `Button` to change a boolean when it is pressed. This is used for the quit button in the main menu.
+
+#### Button::changeIntOnButtonPress ####
+
+Basically the same as above, but with integers. This method allows the choice to increment a variable or assign a variable.
