@@ -50,7 +50,7 @@ This is a function that handles most of the collision logic with the player. It 
 Just a header file that declares the `Blocker` class, its constructor,  and its methods.
 
 
-### button.cpp ###
+### Button.cpp ###
 
 This is the file that defines the methods that the `Button` class uses. `Buttons` are used to go between `Loaders`, aka levels. They also can be used as text boxes, like in the main menu and the credits page.
 
