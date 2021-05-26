@@ -69,3 +69,19 @@ This is the method that causes the `Button` to change a boolean when it is press
 #### Button::changeIntOnButtonPress ####
 
 Basically the same as above, but with integers. This method allows the choice to increment a variable or assign a variable.
+
+### Button.h ###
+
+Just a header that declares the `Button` class and its methods.
+
+### Connect4Pieces.h ###
+
+The header file that declares the `Connect4Piece` class.
+
+### Enemies.cpp ###
+
+This defines the methods of the `Enemy` class, which isn't currently being used by any game.
+
+#### Enemy::draw ####
+
+The method that draws the `Enemy` to the screen, which is just a black circle.
