@@ -94,3 +94,40 @@ This defines the methods of the `Enemy` class, which isn't currently being used 
 #### Enemy::draw ####
 
 The method that draws the `Enemy` to the screen, which is just a black circle.
+
+## Build instructions ##
+
+Here are the commands that I used to build the executable
+
+
+echo > Setup required Environment  
+echo -------------------------------------  
+SET RAYLIB_PATH=C:\raylib  
+SET COMPILER_PATH=C:\raylib\MinGW\bin  
+ENV_SET PATH=$(COMPILER_PATH)  
+SET CC=g++  
+SET CFLAGS=$(RAYLIB_PATH)\raylib\src\raylib.rc.data -s -static -O2 -std=c99 -Wall -Iexternal -I$(RAYLIB_PATH)/src -DPLATFORM_DESKTOP  
+SET LDFLAGS=-lraylib -lopengl32 -lgdi32 -lwinmm  
+cd $(CURRENT_DIRECTORY)  
+echo  
+echo > Clean latest build  
+echo ------------------------  
+cmd /c IF EXIST $(NAME_PART).exe del /F $(NAME_PART).exe  
+echo  
+echo > Saving Current File  
+echo -------------------------  
+npp_save  
+echo  
+echo > Compile program  
+echo -----------------------  
+$(CC) -o build/$(NAME_PART).exe main.cpp boundaries.cpp button.cpp enemies.cpp player.cpp $(CFLAGS) $(LDFLAGS)  
+echo  
+echo > Reset Environment  
+echo --------------------------  
+ENV_UNSET PATH  
+echo  
+echo > Execute program  
+echo -----------------------
+cmd /c IF EXIST (build/$(NAME_PART).exe) (build/$(NAME_PART).exe)  
+
+This is just a slightly modified version of the commands used to build files in the notepad++ IDE thats built specifically for raylib. I personally make modifications in VSCode and use notepad++ just to build the exe.
