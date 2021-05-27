@@ -127,7 +127,7 @@ echo --------------------------
 ENV_UNSET PATH  
 echo  
 echo > Execute program  
-echo -----------------------
+echo -----------------------  
 cmd /c IF EXIST (build/$(NAME_PART).exe) (build/$(NAME_PART).exe)  
 
 This is just a slightly modified version of the commands used to build files in the notepad++ IDE thats built specifically for raylib. I personally make modifications in VSCode and use notepad++ just to build the exe.
