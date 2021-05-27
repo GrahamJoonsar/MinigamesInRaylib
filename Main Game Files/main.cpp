@@ -1,14 +1,13 @@
 
 #include "raylib.h"
 #include "player.h"
-//#include "boundaries.h"
-#include "loader.h"
+#include "loader.h" // Levels
 #include "enemies.h"
 #include "connect4pieces.h"
 #include <math.h>
 #include <iostream>
 #include <string>
-//1#include "button.h"
+
 
 void loadLevel(Loader * l, Player * p, Player * p2){
     p->x = l->playerStartingX;
@@ -42,7 +41,17 @@ Player player(250, 250, 20, GREEN, '1'); // Player declaration
 Player player2(250, 250, 20, BLUE, '2');
 
 // Enemy Declaration
-Enemy enemy(500, 250, 0, 0, false, BLACK);
+Enemy enemy(500, 250, 0, 0, false, BLACK); // For testing, not really used yet
+
+
+/********** Dodgeball Code *************/
+
+
+Blocker dodgeBallBlockers[] = {{0, 0, 'r', 0, 20, screenHeight, GRAY}};
+
+Button dodgeBallButtons[] = {{850, 450, 145, 45, 50, GRAY, LIGHTGRAY, DARKGRAY, "BACK", 1, true}};
+
+Loader dodgeBall(-40, -40, -40, -40, false, false, 1, connect4Blockers, 1, connect4Buttons);
 
 /********** Connect 4 Code *************/
 
@@ -230,13 +239,12 @@ Button mazeButtons[] = {{850, 450, 145, 45, 50, GRAY, LIGHTGRAY, DARKGRAY, "BACK
 Loader maze(40, 40, 45, 40, true, true, 15, mazeBlockers, 1, mazeButtons);
 
 void mazeCode(){
-    if (720 < player.x && player.y > 400){
+    if (720 < player.x && player.y > 400){ // If the green player is in the goal
         player.canMove = false;
         player2.canMove = false;
         DrawText("GREEN", 855, 5, 30, GREEN);
         DrawText("WINS", 855, 35, 30, GREEN);
-        running = false;
-    } else if (720 < player2.x && player2.y > 400){
+    } else if (720 < player2.x && player2.y > 400){ // If the blue player is in the goal
         player.canMove = false;
         player2.canMove = false;
         DrawText("BLUE", 855, 5, 30, BLUE);
@@ -285,10 +293,10 @@ void sumoCode(){
     DrawText("Blue Score: ", 850, 50, 20, BLUE);
     DrawText(std::to_string(blueSumoScore).c_str(), 850, 70, 20, BLUE);
     if (distance(420, 250, player.x, player.y) > sumoBlockers[4].radius){
-        resetSumo(2);
-    } else if (distance(420, 250, player2.x, player2.y) > sumoBlockers[4].radius){
+        resetSumo(2); // Green player wins
+    } else if (distance(420, 250, player2.x, player2.y) > sumoBlockers[4].radius){ // Blue player wins
         resetSumo(1);
-    } else if (distance(player.x, player.y, player2.x, player2.y) < 40){
+    } else if (distance(player.x, player.y, player2.x, player2.y) < 40){ // Collsion between players
         double angle = atan2f(player.y - player2.y, player.x - player2.x);
         player.xVel = cos(angle) * 5;
         player.yVel = sin(angle) * 5;
@@ -329,7 +337,7 @@ Loader mainMenu(500, -20, 500, -20, false, false, 1, mainMenuBlockers, 4, mainMe
 Loader allLevels[] = {mainMenu, levelSelect, credits, maze, test, sumo, connect4};
 
 int main(void){
-    mazeBlockers[14].isColliding = false; // the goal
+    mazeBlockers[14].isColliding = false; // the goal for race
     sumoBlockers[4].isColliding = false; // The sumo ring
 
     Loader * level; // this is the level that will be displayed
@@ -352,13 +360,13 @@ int main(void){
             level->levelSpecificButtons[i].draw();
         }
         for (int i = 0; i < level->lSBLength2; i++){ // Checking for button presses
-            if (level->levelSpecificButtons[i].type == 'n'){
+            if (level->levelSpecificButtons[i].type == 'n'){ // Normal button that changes levels
                 level->levelSpecificButtons[i].onButtonPress(&currentLevel);
-            } else if (level->levelSpecificButtons[i].type == 'b'){
+            } else if (level->levelSpecificButtons[i].type == 'b'){ // Button tha changes a boolean
                 level->levelSpecificButtons[i].changeBoolOnButtonPressed();
-            } else {
-                //level->levelSpecificButtons[i].changeIntOnButtonPress()
-            }
+            }/* else {
+                level->levelSpecificButtons[i].changeIntOnButtonPress()
+            }*/
         }
 
         player.draw(); // Drawing and moving the player legally
@@ -367,7 +375,7 @@ int main(void){
         player2.move(level->levelSpecificBlockers, level->lSBLength);
 
 
-        if (currentLevel != pastLevel){
+        if (currentLevel != pastLevel){ // The level changed
             level = &allLevels[currentLevel];
             loadLevel(&allLevels[currentLevel], &player, &player2);
             switch (currentLevel){ // Initializing the level
