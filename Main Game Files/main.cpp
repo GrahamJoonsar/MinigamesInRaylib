@@ -7,6 +7,8 @@
 #include <math.h>
 #include <iostream>
 #include <string>
+//#include <stdlib.h>
+//#include <time.h>
 
 
 void loadLevel(Loader * l, Player * p, Player * p2){
@@ -40,18 +42,82 @@ int pastLevel = 0;
 Player player(250, 250, 20, GREEN, '1'); // Player declaration
 Player player2(250, 250, 20, BLUE, '2');
 
-// Enemy Declaration
-Enemy enemy(500, 250, 0, 0, false, BLACK); // For testing, not really used yet
 
+/********** Soccer Code *************/
 
-/********** Dodgeball Code *************/
+int ballX = 375;
+int ballY = 250;
+float ballXVel = 0;
+float ballYVel = 0;
 
+int greenSoccerScore = 0;
+int blueSoccerScore = 0;
 
-Blocker dodgeBallBlockers[] = {{0, 0, 'r', 0, 20, screenHeight, GRAY}};
+void soccerCode(){
+    DrawCircle(ballX, ballY, 30, RED); // Drawing the soccer ball
+    if (distance(ballX, ballY, player.x, player.y) <= 50){ // Collision with player one
+        float angle = atan2(ballY - player.y, ballX - player.x);
 
-Button dodgeBallButtons[] = {{850, 450, 145, 45, 50, GRAY, LIGHTGRAY, DARKGRAY, "BACK", 1, true}};
+        ballXVel = cos(angle) * 4;
+        ballYVel = sin(angle) * 4;
 
-Loader dodgeBall(-40, -40, -40, -40, false, false, 1, connect4Blockers, 1, connect4Buttons);
+        player.xVel = cos(angle + 3.1415926) * 3;
+        player.yVel = sin(angle + 3.1415926) * 3;
+    } else if (distance(ballX, ballY, player2.x, player2.y) <= 50){ // Collision with player two
+        float angle = atan2(ballY - player2.y, ballX - player2.x);
+
+        ballXVel = cos(angle) * 4;
+        ballYVel = sin(angle) * 4;
+
+        player2.xVel = cos(angle + 3.1415926) * 3;
+        player2.yVel = sin(angle + 3.1415926) * 3;
+    }
+    if (distance(player.x, player.y, player2.x, player2.y) < 40){ // Collsion between players
+        double angle = atan2f(player.y - player2.y, player.x - player2.x);
+        player.xVel = cos(angle) * 5;
+        player.yVel = sin(angle) * 5;
+        player2.xVel = cos(angle + 3.1415926) * 5;
+        player2.yVel = sin(angle + 3.1415926) * 5;
+    }
+
+    // Keeping the ball in bounds
+    if (ballX + ballXVel > 50 && ballX + ballXVel < 795){
+        ballX += ballXVel;
+    }
+
+    if (ballY + ballYVel > 50 && ballY + ballYVel < 450){
+        ballY += ballYVel;
+    }
+
+    if (ballX < 100){
+        blueSoccerScore++;
+        ballXVel = ballYVel = 0;
+        ballX = 375;
+        ballY = 250;
+    } else if (ballX > 745){
+        greenSoccerScore++;
+        ballXVel = ballYVel = 0;
+        ballX = 375;
+        ballY = 250;
+    }
+
+    DrawText("Green Score: ", 850, 10, 20, GREEN);
+    DrawText(std::to_string(greenSoccerScore).c_str(), 850, 30, 20, GREEN);
+    DrawText("Blue Score: ", 850, 50, 20, BLUE);
+    DrawText(std::to_string(blueSoccerScore).c_str(), 850, 70, 20, BLUE);
+}
+
+Blocker soccerBlockers[] = {{0, 0, 'r', 0, 20, screenHeight, GRAY}, // left
+                                {0, 0, 'r', 0, 845, 20, GRAY}, // Top
+                                {0, screenHeight - 20, 'r', 0, 845, 20, GRAY}, // Bottom
+                                {825, 0, 'r', 0, 20, screenHeight, GRAY}, // Right
+                                {20, 20, 'r', 0, 80, 460, LIGHTGRAY},
+                                {745, 20, 'r', 0, 80, 460, LIGHTGRAY}};
+
+Button soccerButtons[] = {{850, 450, 145, 45, 50, GRAY, LIGHTGRAY, DARKGRAY, "BACK", 1, true}};
+
+Loader soccer(250, 250, 500, 250, true, true, 6, soccerBlockers, 1, soccerButtons);
+
 
 /********** Connect 4 Code *************/
 
@@ -97,7 +163,7 @@ void drawThePreImageOfTheConnect4Piece(){
             break;
         }
     }
-    if (freeIndex != -1){
+    if (freeIndex != -1){ // if empty space
         if (playerTurn % 2 == 0){ // red turn
             DrawCircle(preimageX > 780 ? 780 : preimageX, freeIndex * 80 + 40, 32, {255, 0, 0, 124});
         } else { // yellow turn
@@ -151,10 +217,23 @@ void checkPiecesForWinner(){
                         }
                 }
             }
-            if (i <= 6 && j <= 2){ // Diagonal
+            if (i <= 6 && j <= 2){ // Down Diagonal
                 if ((connect4Pieces[i][j].colorNum == connect4Pieces[i + 1][j + 1].colorNum) &&
                     (connect4Pieces[i][j].colorNum == connect4Pieces[i + 2][j + 2].colorNum) &&
                     (connect4Pieces[i][j].colorNum == connect4Pieces[i + 3][j + 3].colorNum)){
+                        if (connect4Pieces[i][j].colorNum == 0){
+                            redWon = true;
+                            return;
+                        } else if (connect4Pieces[i][j].colorNum == 1){
+                            yellowWon = true;
+                            return;
+                        }
+                }
+            }
+            if (i <= 6 && j >= 3){ // Up Diagonal
+                if ((connect4Pieces[i][j].colorNum == connect4Pieces[i + 1][j - 1].colorNum) &&
+                    (connect4Pieces[i][j].colorNum == connect4Pieces[i + 2][j - 2].colorNum) &&
+                    (connect4Pieces[i][j].colorNum == connect4Pieces[i + 3][j - 3].colorNum)){
                         if (connect4Pieces[i][j].colorNum == 0){
                             redWon = true;
                             return;
@@ -320,10 +399,11 @@ Button levelSelectButtons[] = {{300, 50, 405, 45, 50, DARKGRAY, LIGHTGRAY, LIGHT
                                 {337, 150, 125, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "RACE", 3, true},
                                 {337, 250, 125, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "TEST", 4, true},
                                 {337, 350, 125, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "SUMO", 5, true},
-                                {297, 440, 215, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "Connect 4", 6, true},
+                                {297, 440, 245, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "CONNECT 4", 6, true},
+                                {537, 150, 180, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "SOCCER", 7, true},
                                 {700, 400, 145, 45, 50, GRAY, LIGHTGRAY, DARKGRAY, "BACK", 0, true}};
 
-Loader levelSelect(500, -20, 500, -20, false, false, 1, levelSelectBlockers, 6, levelSelectButtons);
+Loader levelSelect(500, -20, 500, -20, false, false, 1, levelSelectBlockers, 7, levelSelectButtons);
 
 // Main menu Setup (Finished?)
 Blocker mainMenuBlockers[] = {{0, 0, 'r', 0, screenWidth, screenHeight, LIGHTGRAY}};
@@ -334,17 +414,19 @@ Button mainMenuButtons[] = {{350, 50, 300, 45, 50, DARKGRAY, LIGHTGRAY, LIGHTGRA
 
 Loader mainMenu(500, -20, 500, -20, false, false, 1, mainMenuBlockers, 4, mainMenuButtons);
 
-Loader allLevels[] = {mainMenu, levelSelect, credits, maze, test, sumo, connect4};
+Loader allLevels[] = {mainMenu, levelSelect, credits, maze, test, sumo, connect4, soccer};
 
 int main(void){
     mazeBlockers[14].isColliding = false; // the goal for race
     sumoBlockers[4].isColliding = false; // The sumo ring
+    soccerBlockers[4].isColliding = false; // Left Soccer goal
+    soccerBlockers[5].isColliding = false; // Right Soccer goal
 
     Loader * level; // this is the level that will be displayed
     level = &allLevels[0]; // Setting the starting level, probably main menu
     loadLevel(&mainMenu, &player, &player2); // Loading the level
 
-    InitWindow(screenWidth, screenHeight, "The game");
+    InitWindow(screenWidth, screenHeight, "Minigames");
 
     SetTargetFPS(60);
     while (!WindowShouldClose() && running)
@@ -391,6 +473,11 @@ int main(void){
                         }
                     }
                     break;
+                case 7:
+                    ballXVel = ballYVel = greenSoccerScore = blueSoccerScore = 0;
+                    ballX = 375;
+                    ballY = 250;
+                    break;
             }
         }
 
@@ -409,6 +496,9 @@ int main(void){
                 drawTheConnect4Pieces();
                 drawThePreImageOfTheConnect4Piece();
                 getConnect4Input();
+                break;
+            case 7: // Soccer
+                soccerCode();
                 break;
         }
 
