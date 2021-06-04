@@ -4,11 +4,12 @@
 #include "loader.h" // Levels
 #include "enemies.h"
 #include "connect4pieces.h"
+#include "flappyPipes.h"
 #include <math.h>
 #include <iostream>
 #include <string>
-//#include <stdlib.h>
-//#include <time.h>
+#include <stdlib.h>     
+#include <time.h>
 
 
 void loadLevel(Loader * l, Player * p, Player * p2){
@@ -24,7 +25,7 @@ double distance(double x1, double y1, double x2, double y2){
     return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
 
-int roundToMultipleOf(int numToRound, int multiple){
+int roundToMultipleOf(int numToRound, int multiple){ // Used for connect 4
     if (numToRound % multiple > multiple / 2){
         return numToRound + (multiple - (numToRound % multiple));
     } else {
@@ -32,7 +33,7 @@ int roundToMultipleOf(int numToRound, int multiple){
     }
 }
 
-// Setup and declaration
+// Setup and declaration of globally important variables
 const int screenWidth = 1000;
 const int screenHeight = 500;
 bool running = true;
@@ -42,10 +43,134 @@ int pastLevel = 0;
 Player player(250, 250, 20, GREEN, '1'); // Player declaration
 Player player2(250, 250, 20, BLUE, '2');
 
+/********** Flappy Bird Code *************/
+
+int flappyTime = 0;
+
+int flappyGreenY = 250;
+int flappyBlueY = 250;
+
+float flappyGreenYVel = 0;
+float flappyBlueYVel = 0;
+
+int flappyGreenScore = 0;
+int flappyBlueScore = 0;
+
+const int numOfPipes = 5;
+Pipe topFlappyPipes[numOfPipes];
+Pipe bottomFlappyPipes[numOfPipes];
+
+void flappyInput(){
+    if (IsKeyPressed(KEY_W)){flappyGreenYVel = -2.5;}
+    if (IsKeyPressed(KEY_UP)){flappyBlueYVel = -2.5;}
+}
+
+void makePipes(){
+    for (int i = 0; i < numOfPipes; i++){
+        topFlappyPipes[i].x = i * 165;
+        bottomFlappyPipes[i].x = i * 165;
+
+        topFlappyPipes[i].y = 20;
+        topFlappyPipes[i].width = 20;
+        bottomFlappyPipes[i].width = 20;
+        topFlappyPipes[i].height = (rand() % 350) + 20;
+        bottomFlappyPipes[i].y = topFlappyPipes[i].height + 120;
+        bottomFlappyPipes[i].height = 480 - bottomFlappyPipes[i].y;
+    }
+}
+
+void movePipes(){
+    for (int i = 0; i < numOfPipes; i++){
+        if (topFlappyPipes[i].x <= 20){ // restting the pipes
+            topFlappyPipes[i].x = 825;
+            bottomFlappyPipes[i].x = 825;
+            topFlappyPipes[i].height = (rand() % 350) + 20;
+            bottomFlappyPipes[i].y = topFlappyPipes[i].height + 120;
+            bottomFlappyPipes[i].height = 480 - bottomFlappyPipes[i].y;
+        } else { // moving the pipes
+            if (flappyTime > 120){ // Two seconds after the game has started
+                topFlappyPipes[i].x -= 1;
+                bottomFlappyPipes[i].x -= 1;
+            }
+        }
+    }
+}
+
+void resetFlappy(){
+    flappyTime = 0;
+    makePipes();
+    flappyGreenY = flappyBlueY = 250;
+    flappyGreenYVel = flappyBlueYVel = flappyTime = 0;
+}
+
+void checkFlappyCollision(){
+    for (int i = 0; i < numOfPipes; i++){
+        if (topFlappyPipes[i].x <= 90 && topFlappyPipes[i].x >= 50){ // Blue could collide
+            if (flappyBlueY <= 35 + topFlappyPipes[i].height){
+                flappyGreenScore++;
+                resetFlappy();
+            } else if (flappyBlueY >= bottomFlappyPipes[i].y - 20){
+                flappyGreenScore++;
+                resetFlappy();
+            }
+        }
+        if (topFlappyPipes[i].x <= 70 && topFlappyPipes[i].x >= 30){ // Green could collide
+            if (flappyGreenY <= 35 + topFlappyPipes[i].height){
+                flappyBlueScore++;
+                resetFlappy();
+            } else if (flappyGreenY >= bottomFlappyPipes[i].y - 20){
+                flappyBlueScore++;
+                resetFlappy();
+            }
+        }
+    }
+}
+
+void flappyCode(){
+    DrawCircle(50, flappyGreenY, 20, GREEN); // Drawing green player
+    DrawCircle(70, flappyBlueY, 20, BLUE); // Drawing green player
+    for (int i = 0; i < numOfPipes; i++){
+        topFlappyPipes[i].draw();
+        bottomFlappyPipes[i].draw();
+    }
+    flappyInput();
+    movePipes();
+    checkFlappyCollision();
+    flappyTime++;
+    if (flappyGreenY + flappyGreenYVel < 40 || flappyGreenY + flappyGreenYVel > 460){
+        flappyGreenYVel = 0;
+    } else {
+        flappyGreenY += flappyGreenYVel;
+    }
+    if (flappyBlueY + flappyBlueYVel < 40 || flappyBlueY + flappyBlueYVel > 460){
+        flappyBlueYVel = 0;
+    } else {
+        flappyBlueY += flappyBlueYVel;
+    }
+    // Gravity
+    flappyGreenYVel += 0.1;
+    flappyBlueYVel += 0.1;
+
+    DrawText("Green Score: ", 850, 10, 20, GREEN);
+    DrawText(std::to_string(flappyGreenScore).c_str(), 850, 30, 20, GREEN);
+    DrawText("Blue Score: ", 850, 50, 20, BLUE);
+    DrawText(std::to_string(flappyBlueScore).c_str(), 850, 70, 20, BLUE);
+}
+
+Blocker flappyBlockers[] = {{0, 0, 'r', 0, 20, screenHeight, GRAY}, // left
+                                {0, 0, 'r', 0, 845, 20, GRAY}, // Top
+                                {0, screenHeight - 20, 'r', 0, 845, 20, GRAY}, // Bottom
+                                {825, 0, 'r', 0, 20, screenHeight, GRAY}, // Right
+};
+
+Button flappyButtons[] = {{850, 450, 145, 45, 50, GRAY, LIGHTGRAY, DARKGRAY, "BACK", 1, true}};
+
+Loader flappy(-250, 250, -500, 250, false, false, 4, flappyBlockers, 1, flappyButtons);
 
 /********** Soccer Code *************/
 
-int ballX = 375;
+// Soccer ball specific vars
+int ballX = 395;
 int ballY = 250;
 float ballXVel = 0;
 float ballYVel = 0;
@@ -58,16 +183,16 @@ void soccerCode(){
     if (distance(ballX, ballY, player.x, player.y) <= 50){ // Collision with player one
         float angle = atan2(ballY - player.y, ballX - player.x);
 
-        ballXVel = cos(angle) * 4;
-        ballYVel = sin(angle) * 4;
+        ballXVel += cos(angle) * 4;
+        ballYVel += sin(angle) * 4;
 
         player.xVel = cos(angle + 3.1415926) * 3;
         player.yVel = sin(angle + 3.1415926) * 3;
     } else if (distance(ballX, ballY, player2.x, player2.y) <= 50){ // Collision with player two
         float angle = atan2(ballY - player2.y, ballX - player2.x);
 
-        ballXVel = cos(angle) * 4;
-        ballYVel = sin(angle) * 4;
+        ballXVel += cos(angle) * 4;
+        ballYVel += sin(angle) * 4;
 
         player2.xVel = cos(angle + 3.1415926) * 3;
         player2.yVel = sin(angle + 3.1415926) * 3;
@@ -81,23 +206,24 @@ void soccerCode(){
     }
 
     // Keeping the ball in bounds
-    if (ballX + ballXVel > 50 && ballX + ballXVel < 795){
-        ballX += ballXVel;
-    }
-
     if (ballY + ballYVel > 50 && ballY + ballYVel < 450){
         ballY += ballYVel;
+    } else {
+        ballYVel *= -1;
+        ballY += ballYVel;
     }
+
+    ballX += ballXVel;
 
     if (ballX < 100){
         blueSoccerScore++;
         ballXVel = ballYVel = 0;
-        ballX = 375;
+        ballX = 395;
         ballY = 250;
     } else if (ballX > 745){
         greenSoccerScore++;
         ballXVel = ballYVel = 0;
-        ballX = 375;
+        ballX = 395;
         ballY = 250;
     }
 
@@ -401,9 +527,10 @@ Button levelSelectButtons[] = {{300, 50, 405, 45, 50, DARKGRAY, LIGHTGRAY, LIGHT
                                 {337, 350, 125, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "SUMO", 5, true},
                                 {297, 440, 245, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "CONNECT 4", 6, true},
                                 {537, 150, 180, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "SOCCER", 7, true},
+                                {537, 250, 180, 35, 40, GRAY, LIGHTGRAY, DARKGRAY, "FLAPPY", 8, true},
                                 {700, 400, 145, 45, 50, GRAY, LIGHTGRAY, DARKGRAY, "BACK", 0, true}};
 
-Loader levelSelect(500, -20, 500, -20, false, false, 1, levelSelectBlockers, 7, levelSelectButtons);
+Loader levelSelect(500, -20, 500, -20, false, false, 1, levelSelectBlockers, 8, levelSelectButtons);
 
 // Main menu Setup (Finished?)
 Blocker mainMenuBlockers[] = {{0, 0, 'r', 0, screenWidth, screenHeight, LIGHTGRAY}};
@@ -414,9 +541,11 @@ Button mainMenuButtons[] = {{350, 50, 300, 45, 50, DARKGRAY, LIGHTGRAY, LIGHTGRA
 
 Loader mainMenu(500, -20, 500, -20, false, false, 1, mainMenuBlockers, 4, mainMenuButtons);
 
-Loader allLevels[] = {mainMenu, levelSelect, credits, maze, test, sumo, connect4, soccer};
+Loader allLevels[] = {mainMenu, levelSelect, credits, maze, test, sumo, connect4, soccer, flappy};
 
 int main(void){
+    srand(time(NULL)); // Initializing the random seed
+
     mazeBlockers[14].isColliding = false; // the goal for race
     sumoBlockers[4].isColliding = false; // The sumo ring
     soccerBlockers[4].isColliding = false; // Left Soccer goal
@@ -458,8 +587,8 @@ int main(void){
 
 
         if (currentLevel != pastLevel){ // The level changed
-            level = &allLevels[currentLevel];
-            loadLevel(&allLevels[currentLevel], &player, &player2);
+            level = &allLevels[currentLevel]; // Change the level
+            loadLevel(&allLevels[currentLevel], &player, &player2); // Load the new level
             switch (currentLevel){ // Initializing the level
                 case 5: // sumo
                     greenSumoScore = blueSumoScore = 0;
@@ -477,6 +606,11 @@ int main(void){
                     ballXVel = ballYVel = greenSoccerScore = blueSoccerScore = 0;
                     ballX = 375;
                     ballY = 250;
+                    break;
+                case 8: // flappy
+                    makePipes();
+                    flappyGreenY = flappyBlueY = 250;
+                    flappyGreenScore = flappyBlueScore = flappyGreenYVel = flappyBlueYVel = flappyTime = 0;
                     break;
             }
         }
@@ -499,6 +633,9 @@ int main(void){
                 break;
             case 7: // Soccer
                 soccerCode();
+                break;
+            case 8: // Flappy
+                flappyCode();
                 break;
         }
 
